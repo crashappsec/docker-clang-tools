@@ -17,14 +17,15 @@ jobs:
       matrix:
         include:
           - builder: ubuntu-latest
-            platform: linux/amd64
+            platform: amd64
           - builder: buildjet-8vcpu-ubuntu-2204-arm
-            platform: linux/arm64
+            platform: arm64
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
 
+      # not necessary as build is native on ARM
       # - name: Set up QEMU
       #   uses: docker/setup-qemu-action@v2
 
@@ -43,9 +44,35 @@ jobs:
         with:
           file: Dockerfile
           push: true
-          platforms: ${{ matrix.platform }}
+          platforms: linux/${{ matrix.platform }}
           build-args: |
             CLANG_TIDY_VERSION=${{ inputs.CLANG_TIDY_VERSION }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/clang-tidy:latest
-            ghcr.io/${{ github.repository_owner }}/clang-tidy:${{ inputs.CLANG_TIDY_VERSION }}
+            ghcr.io/${{ github.repository_owner }}/clang-tidy:latest-${{ matrix.platform }}
+            ghcr.io/${{ github.repository_owner }}/clang-tidy:${{ inputs.CLANG_TIDY_VERSION }}-${{ matrix.platform }}
+
+  manifest:
+    runs-on: ubuntu-latest
+    needs: release
+
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
+
+      - name: Create and push manifest images for latest
+        uses: Noelware/docker-manifest-action@master
+        with:
+          base-image: ghcr.io/${{ github.repository_owner }}/clang-tidy:latest
+          extra-images: ghcr.io/${{ github.repository_owner }}/clang-tidy:latest-amd64,ghcr.io/${{ github.repository_owner }}/clang-tidy:latest-arm64
+          push: true
+
+      - name: Create and push manifest images for specific version
+        uses: Noelware/docker-manifest-action@master
+        with:
+          base-image: ghcr.io/${{ github.repository_owner }}/clang-tidy:${{ inputs.CLANG_TIDY_VERSION }}
+          extra-images: ghcr.io/${{ github.repository_owner }}/clang-tidy:${{ inputs.CLANG_TIDY_VERSION }}-amd64,ghcr.io/${{ github.repository_owner }}/clang-tidy:${{ inputs.CLANG_TIDY_VERSION }}-arm64
+          push: true
