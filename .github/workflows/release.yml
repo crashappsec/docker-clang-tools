@@ -3,10 +3,15 @@ name: docker image
 on:
   workflow_dispatch:
     inputs:
-      CLANG_TIDY_VERSION:
-        description: "clang-tidy version"
+      UBUNTU_VERSION:
+        description: "base ubuntu version"
         required: true
-        default: "14.0.6"
+        default: "lunar-20230731"
+        type: string
+      CLANG_VERSION:
+        description: "clang apt package version"
+        required: true
+        default: "16"
         type: string
 
 jobs:
@@ -44,12 +49,14 @@ jobs:
         with:
           file: Dockerfile
           push: true
+          provenance: false # https://github.com/docker/buildx/issues/1608
           platforms: linux/${{ matrix.platform }}
           build-args: |
-            CLANG_TIDY_VERSION=${{ inputs.CLANG_TIDY_VERSION }}
+            UBUNTU_VERSION=${{ inputs.UBUNTU_VERSION }}
+            CLANG_VERSION=${{ inputs.CLANG_VERSION }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/clang-tidy:latest-${{ matrix.platform }}
-            ghcr.io/${{ github.repository_owner }}/clang-tidy:${{ inputs.CLANG_TIDY_VERSION }}-${{ matrix.platform }}
+            ghcr.io/${{ github.repository_owner }}/clang-tools:latest-${{ matrix.platform }}
+            ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}-${{ matrix.platform }}
 
   manifest:
     runs-on: ubuntu-latest
@@ -66,13 +73,13 @@ jobs:
       - name: Create and push manifest images for latest
         uses: Noelware/docker-manifest-action@master
         with:
-          base-image: ghcr.io/${{ github.repository_owner }}/clang-tidy:latest
-          extra-images: ghcr.io/${{ github.repository_owner }}/clang-tidy:latest-amd64,ghcr.io/${{ github.repository_owner }}/clang-tidy:latest-arm64
+          base-image: ghcr.io/${{ github.repository_owner }}/clang-tools:latest
+          extra-images: ghcr.io/${{ github.repository_owner }}/clang-tools:latest-amd64,ghcr.io/${{ github.repository_owner }}/clang-tools:latest-arm64
           push: true
 
       - name: Create and push manifest images for specific version
-        uses: Noelware/docker-manifest-action@master
+        uses: Noelware/docker-manifest-action@0.3.1
         with:
-          base-image: ghcr.io/${{ github.repository_owner }}/clang-tidy:${{ inputs.CLANG_TIDY_VERSION }}
-          extra-images: ghcr.io/${{ github.repository_owner }}/clang-tidy:${{ inputs.CLANG_TIDY_VERSION }}-amd64,ghcr.io/${{ github.repository_owner }}/clang-tidy:${{ inputs.CLANG_TIDY_VERSION }}-arm64
+          base-image: ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}
+          extra-images: ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}-amd64,ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}-arm64
           push: true
