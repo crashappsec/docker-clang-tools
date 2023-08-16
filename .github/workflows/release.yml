@@ -23,7 +23,7 @@ jobs:
         include:
           - builder: ubuntu-latest
             platform: amd64
-          - builder: buildjet-8vcpu-ubuntu-2204-arm
+          - builder: ubuntu-latest # buildjet-2vcpu-ubuntu-2204-arm
             platform: arm64
 
     steps:
