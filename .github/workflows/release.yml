@@ -45,7 +45,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Build and Push Docker Image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           file: Dockerfile
           push: true
@@ -71,15 +71,15 @@ jobs:
           password: ${{ github.token }}
 
       - name: Create and push manifest images for latest
-        uses: Noelware/docker-manifest-action@master
+        uses: Noelware/docker-manifest-action@0.3.1
         with:
-          base-image: ghcr.io/${{ github.repository_owner }}/clang-tools:latest
-          extra-images: ghcr.io/${{ github.repository_owner }}/clang-tools:latest-amd64,ghcr.io/${{ github.repository_owner }}/clang-tools:latest-arm64
+          inputs: ghcr.io/${{ github.repository_owner }}/clang-tools:latest
+          images: ghcr.io/${{ github.repository_owner }}/clang-tools:latest-amd64,ghcr.io/${{ github.repository_owner }}/clang-tools:latest-arm64
           push: true
 
       - name: Create and push manifest images for specific version
         uses: Noelware/docker-manifest-action@0.3.1
         with:
-          base-image: ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}
-          extra-images: ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}-amd64,ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}-arm64
+          inputs: ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}
+          images: ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}-amd64,ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}-arm64
           push: true
