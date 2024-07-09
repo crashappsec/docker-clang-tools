@@ -71,14 +71,14 @@ jobs:
           password: ${{ github.token }}
 
       - name: Create and push manifest images for latest
-        uses: Noelware/docker-manifest-action@0.3.1
+        uses: Noelware/docker-manifest-action@56f19b00084cefe1b43752e27025979fa5707a70 #0.3.1
         with:
           inputs: ghcr.io/${{ github.repository_owner }}/clang-tools:latest
           images: ghcr.io/${{ github.repository_owner }}/clang-tools:latest-amd64,ghcr.io/${{ github.repository_owner }}/clang-tools:latest-arm64
           push: true
 
       - name: Create and push manifest images for specific version
-        uses: Noelware/docker-manifest-action@0.3.1
+        uses: Noelware/docker-manifest-action@56f19b00084cefe1b43752e27025979fa5707a70 #0.3.1
         with:
           inputs: ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}
           images: ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}-amd64,ghcr.io/${{ github.repository_owner }}/clang-tools:${{ inputs.CLANG_VERSION }}-arm64
